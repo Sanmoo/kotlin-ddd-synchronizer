@@ -5,7 +5,7 @@ import software.amazon.kinesis.processor.ShardRecordProcessor
 import java.nio.charset.StandardCharsets
 import java.util.logging.Logger
 
-class SimpleRecordProcessor(val processor: (String) -> Unit) : ShardRecordProcessor {
+class SimpleRecordProcessor(val processor: EventProcessor) : ShardRecordProcessor {
     private var logger: Logger = Logger.getLogger(SimpleRecordProcessor::class.toString())
 
     override fun initialize(initializationInput: InitializationInput) {
@@ -17,7 +17,7 @@ class SimpleRecordProcessor(val processor: (String) -> Unit) : ShardRecordProces
             logger.info("Decoding record!!!")
             val data = StandardCharsets.UTF_8.decode(record.data()).toString()
             logger.info("Handled record: $data to processor")
-            processor(data)
+            processor.process(data)
         }
 
         processRecordsInput.checkpointer().checkpoint()

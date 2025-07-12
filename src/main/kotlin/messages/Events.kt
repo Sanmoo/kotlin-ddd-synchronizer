@@ -12,26 +12,30 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 )
 sealed class BaseEvent(
     open val type: String,
-    open val createdFromSystem: String
+    open val createdFromSystem: String,
+    open val eventId: String,
 )
 
 @JsonTypeName("resource.a.created")
 data class ResourceACreatedEvent(
     var id: String,
     var createdAt: java.time.LocalDateTime,
-    override val createdFromSystem: String
-) : BaseEvent("resource.a.created", createdFromSystem)
+    override val createdFromSystem: String,
+    override val eventId: String
+) : BaseEvent("resource.a.created", createdFromSystem, eventId)
 
 @JsonTypeName("resource.a.updated")
 data class ResourceAUpdatedEvent(
     var id: String,
     var updatedAt: java.time.LocalDateTime,
-    override val createdFromSystem: String
-) : BaseEvent("resource.a.updated", createdFromSystem)
+    override val createdFromSystem: String,
+    override val eventId: String
+) : BaseEvent("resource.a.updated", createdFromSystem, eventId)
 
 @JsonTypeName("resource.b.created")
 data class ResourceBCreatedEvent(
     var id: String,
     var createdAt: java.time.LocalDateTime,
-    override val createdFromSystem: String
-) : BaseEvent("resource.b.created", createdFromSystem)
+    override val createdFromSystem: String,
+    override val eventId: String
+) : BaseEvent("resource.b.created", createdFromSystem, eventId)

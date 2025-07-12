@@ -17,6 +17,7 @@ dependencies {
     implementation(platform("software.amazon.awssdk:bom:2.31.78"))
     implementation("software.amazon.awssdk:kinesis")
     implementation("software.amazon.awssdk:dynamodb")
+    implementation("software.amazon.awssdk:sqs")
     implementation("software.amazon.kinesis:amazon-kinesis-client:3.1.1")
 
     // Json Serialization

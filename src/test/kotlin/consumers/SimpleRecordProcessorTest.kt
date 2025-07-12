@@ -1,5 +1,6 @@
 package consumers
 
+import com.github.sanmoo.consumers.EventProcessor
 import com.github.sanmoo.consumers.SimpleRecordProcessor
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
@@ -20,13 +21,13 @@ import kotlin.text.Charsets.UTF_8
 @MockKExtension.ConfirmVerification
 class SimpleRecordProcessorTest {
     @MockK
-    lateinit var processor: (String) -> Unit
+    lateinit var processor: EventProcessor
 
     lateinit var sut: SimpleRecordProcessor
 
     @BeforeEach
     fun setUp() {
-        every { processor.invoke(any()) } just Runs
+        every { processor.process(any()) } just Runs
         sut = SimpleRecordProcessor(processor)
     }
 
@@ -62,8 +63,8 @@ class SimpleRecordProcessorTest {
             processRecordsInput.records()
             mockedRecords[0].data()
             mockedRecords[1].data()
-            processor("test0")
-            processor("test1")
+            processor.process("test0")
+            processor.process("test1")
             processRecordsInput.checkpointer().checkpoint()
         }
     }

@@ -1,5 +1,6 @@
 package consumers
 
+import com.diffplug.selfie.Selfie.expectSelfie
 import com.github.sanmoo.consumers.KCLFactories
 import com.github.sanmoo.consumers.SimpleRecordProcessorFactory
 import com.github.sanmoo.consumers.UpstreamStreamTracker
@@ -10,9 +11,11 @@ import kotlin.test.assertNotNull
 
 class KCLFactoriesTest {
     @Test
-    fun createKCLConfigsBuilder() {
+    fun createKCLConfigsBuilderWithExpectedProperties() {
         val sut = KCLFactories()
-        sut.createKCLConfigsBuilder().apply {
+        val result = sut.createKCLConfigsBuilder()
+
+        result.apply {
             assertNotNull(kinesisClient())
             assertNotNull(cloudWatchClient())
             assertNotNull(dynamoDBClient())
@@ -20,7 +23,13 @@ class KCLFactoriesTest {
             assertNotNull(dynamoDBClient())
             assertEquals("integrator", applicationName())
             assertEquals("single-worker", workerIdentifier())
-            assertInstanceOf(SimpleRecordProcessorFactory::class.java, shardRecordProcessorFactory())
+        }
+
+        assertInstanceOf(SimpleRecordProcessorFactory::class.java, result.shardRecordProcessorFactory())
+        val createdProcessor = (result.shardRecordProcessorFactory() as SimpleRecordProcessorFactory).processor
+
+        createdProcessor.apply {
+            expectSelfie(this.objectMapper.registeredModuleIds.toString()).toBe("[com.fasterxml.jackson.module.kotlin.KotlinModule, jackson-datatype-jsr310]");
         }
     }
 }

@@ -1,11 +1,13 @@
 package consumers
 
+import builders.EventsBuilder
 import com.diffplug.selfie.Selfie.expectSelfie
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.sanmoo.consumers.EventProcessor
 import com.github.sanmoo.messages.CommandDispatcher
+import com.github.sanmoo.messages.CommandRecipient
 import com.github.sanmoo.messages.CreateResourceADownstreamCommand
 import com.github.sanmoo.messages.CreateResourceBDownstreamCommand
 import com.github.sanmoo.messages.UpdateResourceADownstreamCommand
@@ -21,74 +23,75 @@ import org.junit.jupiter.api.extension.ExtendWith
 class EventProcessorTest {
     @MockK
     private lateinit var commandDispatcher: CommandDispatcher
-
     private lateinit var sut: EventProcessor
+    private var objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
 
     @BeforeEach
     fun setUp() {
-        sut = EventProcessor(
-            ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule()),
-            commandDispatcher
-        )
+        sut = EventProcessor(objectMapper, commandDispatcher)
     }
 
     @Test
     fun processEventResourceACreated() {
         val slotForCapturedCommand = slot<CreateResourceADownstreamCommand>()
-        every { commandDispatcher.dispatch(capture(slotForCapturedCommand)) } just Runs
+        every {
+            commandDispatcher.dispatch(
+                capture(slotForCapturedCommand),
+                CommandRecipient.AGGREGATE_A_COMMANDS_INBOX
+            )
+        } just Runs
 
-        sut.process(
-            """
-            {
-                "type": "resource.a.created",
-                "id": "123",
-                "createdAt": "2023-06-01T00:00:00Z",
-                "createdFromSystem": "UPSTREAM_SYSTEM"
-            }
-        """.trimIndent()
-        )
-        verifyAll { commandDispatcher.dispatch(any<CreateResourceADownstreamCommand>()) }
-        expectSelfie(slotForCapturedCommand.captured.toString()).toBe("CreateResourceADownstreamCommand(event=ResourceACreatedEvent(id=123, createdAt=2023-06-01T00:00, createdFromSystem=UPSTREAM_SYSTEM))")
+        sut.process(objectMapper.writeValueAsString(EventsBuilder.buildResourceACreatedEvent()))
+
+        verifyAll {
+            commandDispatcher.dispatch(
+                any<CreateResourceADownstreamCommand>(),
+                CommandRecipient.AGGREGATE_A_COMMANDS_INBOX
+            )
+        }
+        expectSelfie(slotForCapturedCommand.captured.toString()).toBe("CreateResourceADownstreamCommand(event=ResourceACreatedEvent(id=123, createdAt=2023-06-01T00:00, createdFromSystem=UPSTREAM_SYSTEM, eventId=123))")
     }
 
     @Test
     fun processEventResourceAUpdated() {
         val slotForCapturedCommand = slot<UpdateResourceADownstreamCommand>()
-        every { commandDispatcher.dispatch(capture(slotForCapturedCommand)) } just Runs
+        every {
+            commandDispatcher.dispatch(
+                capture(slotForCapturedCommand),
+                CommandRecipient.AGGREGATE_A_COMMANDS_INBOX
+            )
+        } just Runs
 
-        sut.process(
-            """
-            {
-                "type": "resource.a.updated",
-                "id": "123",
-                "updatedAt": "2023-06-01T00:00:00Z",
-                "createdFromSystem": "UPSTREAM_SYSTEM"
-            }
-        """.trimIndent()
-        )
+        sut.process(objectMapper.writeValueAsString(EventsBuilder.buildResourceAUpdatedEvent()))
 
-        verifyAll { commandDispatcher.dispatch(any<UpdateResourceADownstreamCommand>()) }
-        expectSelfie(slotForCapturedCommand.captured.toString()).toBe("UpdateResourceADownstreamCommand(event=ResourceAUpdatedEvent(id=123, updatedAt=2023-06-01T00:00, createdFromSystem=UPSTREAM_SYSTEM))")
+        verifyAll {
+            commandDispatcher.dispatch(
+                any<UpdateResourceADownstreamCommand>(),
+                CommandRecipient.AGGREGATE_A_COMMANDS_INBOX
+            )
+        }
+        expectSelfie(slotForCapturedCommand.captured.toString()).toBe("UpdateResourceADownstreamCommand(event=ResourceAUpdatedEvent(id=123, updatedAt=2023-06-01T00:00, createdFromSystem=UPSTREAM_SYSTEM, eventId=123))")
     }
 
     @Test
     fun processEventResourceBCreated() {
         val slotForCapturedCommand = slot<CreateResourceBDownstreamCommand>()
-        every { commandDispatcher.dispatch(capture(slotForCapturedCommand)) } just Runs
+        every {
+            commandDispatcher.dispatch(
+                capture(slotForCapturedCommand),
+                CommandRecipient.AGGREGATE_B_COMMANDS_INBOX
+            )
+        } just Runs
 
-        sut.process(
-            """
-            {
-                "type": "resource.b.created",
-                "id": "123",
-                "createdAt": "2023-06-01T00:00:00Z",
-                "createdFromSystem": "UPSTREAM_SYSTEM"
-            }
-        """.trimIndent()
-        )
+        sut.process(objectMapper.writeValueAsString(EventsBuilder.buildResourceBCreatedEvent()))
 
-        verifyAll { commandDispatcher.dispatch(any<CreateResourceBDownstreamCommand>()) }
-        expectSelfie(slotForCapturedCommand.captured.toString()).toBe("CreateResourceBDownstreamCommand(event=ResourceBCreatedEvent(id=123, createdAt=2023-06-01T00:00, createdFromSystem=UPSTREAM_SYSTEM))")
+        verifyAll {
+            commandDispatcher.dispatch(
+                any<CreateResourceBDownstreamCommand>(),
+                CommandRecipient.AGGREGATE_B_COMMANDS_INBOX
+            )
+        }
+        expectSelfie(slotForCapturedCommand.captured.toString()).toBe("CreateResourceBDownstreamCommand(event=ResourceBCreatedEvent(id=123, createdAt=2023-06-01T00:00, createdFromSystem=UPSTREAM_SYSTEM, eventId=123))")
     }
 
     @Test
@@ -109,17 +112,7 @@ class EventProcessorTest {
 
     @Test
     fun discardEventOriginatedInDownstream() {
-        sut.process(
-            """
-            {
-                "type": "resource.a.created",
-                "id": "123",
-                "createdAt": "2023-06-01T00:00:00Z",
-                "createdFromSystem": "DOWNSTREAM_SYSTEM"
-            }
-        """.trimIndent()
-        )
-
+        sut.process(objectMapper.writeValueAsString(EventsBuilder.buildResourceACreatedEvent(createdFromSystem = "DOWNSTREAM_SYSTEM")))
         verify { commandDispatcher wasNot called }
     }
 }

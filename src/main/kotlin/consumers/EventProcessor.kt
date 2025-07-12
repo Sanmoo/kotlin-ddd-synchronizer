@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException
 import com.github.sanmoo.messages.BaseEvent
 import com.github.sanmoo.messages.CommandDispatcher
+import com.github.sanmoo.messages.CommandRecipient
 import com.github.sanmoo.messages.CreateResourceADownstreamCommand
 import com.github.sanmoo.messages.CreateResourceBDownstreamCommand
 import com.github.sanmoo.messages.ResourceACreatedEvent
@@ -15,8 +16,8 @@ import java.util.logging.Logger
 private const val DOWNSTREAM_SYSTEM_NAME = "DOWNSTREAM_SYSTEM"
 
 class EventProcessor(
-    private val objectMapper: ObjectMapper,
-    private val commandDispatcher: CommandDispatcher
+    val objectMapper: ObjectMapper,
+    val commandDispatcher: CommandDispatcher
 ) {
     private val logger = Logger.getLogger(EventProcessor::class.java.name)
 
@@ -41,14 +42,14 @@ class EventProcessor(
     }
 
     private fun process(event: ResourceACreatedEvent) {
-        commandDispatcher.dispatch(CreateResourceADownstreamCommand(event))
+        commandDispatcher.dispatch(CreateResourceADownstreamCommand(event), CommandRecipient.AGGREGATE_A_COMMANDS_INBOX)
     }
 
     private fun process(event: ResourceAUpdatedEvent) {
-        commandDispatcher.dispatch(UpdateResourceADownstreamCommand(event))
+        commandDispatcher.dispatch(UpdateResourceADownstreamCommand(event), CommandRecipient.AGGREGATE_A_COMMANDS_INBOX)
     }
 
     private fun process(event: ResourceBCreatedEvent) {
-        commandDispatcher.dispatch(CreateResourceBDownstreamCommand(event))
+        commandDispatcher.dispatch(CreateResourceBDownstreamCommand(event), CommandRecipient.AGGREGATE_B_COMMANDS_INBOX)
     }
 }
