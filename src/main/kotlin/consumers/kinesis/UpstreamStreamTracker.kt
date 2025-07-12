@@ -1,4 +1,4 @@
-package com.github.sanmoo.consumers
+package com.github.sanmoo.consumers.kinesis
 
 import software.amazon.awssdk.arns.Arn
 import software.amazon.kinesis.common.InitialPositionInStream

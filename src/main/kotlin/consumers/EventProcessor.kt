@@ -22,22 +22,17 @@ class EventProcessor(
     private val logger = Logger.getLogger(EventProcessor::class.java.name)
 
     fun process(serializedEvent: String) {
-        try {
-            val event = objectMapper.readValue(serializedEvent, BaseEvent::class.java)
+        val event = objectMapper.readValue(serializedEvent, BaseEvent::class.java)
 
-            if (event.createdFromSystem == DOWNSTREAM_SYSTEM_NAME) {
-                logger.info("Received event from downstream system. No need to propagate down")
-                return
-            }
+        if (event.createdFromSystem == DOWNSTREAM_SYSTEM_NAME) {
+            logger.info("Received event from downstream system. No need to propagate down")
+            return
+        }
 
-            when (event) {
-                is ResourceACreatedEvent -> process(event)
-                is ResourceAUpdatedEvent -> process(event)
-                is ResourceBCreatedEvent -> process(event)
-            }
-        } catch (e: InvalidTypeIdException) {
-            logger.severe("Received unknown event: $serializedEvent")
-            e.printStackTrace()
+        when (event) {
+            is ResourceACreatedEvent -> process(event)
+            is ResourceAUpdatedEvent -> process(event)
+            is ResourceBCreatedEvent -> process(event)
         }
     }
 

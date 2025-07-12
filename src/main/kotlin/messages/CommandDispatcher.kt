@@ -6,7 +6,8 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 
 class CommandDispatcher(
     private val sqsAsyncClient: SqsAsyncClient,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val getenv: (String) -> String?
 ) {
     fun dispatch(command: CreateResourceADownstreamCommand, recipient: CommandRecipient) {
         println("Dispatching command: $command to Aggregate X command processor")
@@ -41,7 +42,7 @@ class CommandDispatcher(
     private fun dispatch(body: String, recipient: CommandRecipient, deduplicationId: String, groupId: String) {
         val sendMessageRequest = SendMessageRequest
             .builder()
-            .queueUrl(recipient.getQueueUrl())
+            .queueUrl(recipient.getQueueUrl(getenv))
             .messageDeduplicationId(deduplicationId)
             .messageGroupId(groupId)
             .messageBody(body)

@@ -1,4 +1,4 @@
-package com.github.sanmoo.consumers
+package com.github.sanmoo.consumers.kinesis
 
 import software.amazon.kinesis.coordinator.Scheduler
 import java.util.logging.Logger
@@ -6,8 +6,8 @@ import java.util.logging.Logger
 class KinesisConsumer(private val scheduler: Scheduler) {
     private var logger: Logger = Logger.getLogger(KinesisConsumer::class.toString())
 
-    fun startAsDaemon(workerIdentifier: String) {
-        logger.info("Starting worker $workerIdentifier...")
+    fun startThread() {
+        logger.info("Starting kinesis consumer...")
 
         Runtime.getRuntime().addShutdownHook(Thread {
             this.shutdown()

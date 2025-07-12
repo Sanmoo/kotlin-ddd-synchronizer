@@ -1,9 +1,9 @@
 package consumers
 
 import com.diffplug.selfie.Selfie.expectSelfie
-import com.github.sanmoo.consumers.KCLFactories
-import com.github.sanmoo.consumers.SimpleRecordProcessorFactory
-import com.github.sanmoo.consumers.UpstreamStreamTracker
+import com.github.sanmoo.consumers.kinesis.KCLFactories
+import com.github.sanmoo.consumers.kinesis.SimpleRecordProcessorFactory
+import com.github.sanmoo.consumers.kinesis.UpstreamStreamTracker
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

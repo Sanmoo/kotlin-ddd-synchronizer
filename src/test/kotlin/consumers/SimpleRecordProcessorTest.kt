@@ -1,7 +1,7 @@
 package consumers
 
 import com.github.sanmoo.consumers.EventProcessor
-import com.github.sanmoo.consumers.SimpleRecordProcessor
+import com.github.sanmoo.consumers.kinesis.SimpleRecordProcessor
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension

@@ -1,6 +1,6 @@
 package consumers
 
-import com.github.sanmoo.consumers.KinesisConsumer
+import com.github.sanmoo.consumers.kinesis.KinesisConsumer
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -43,7 +43,7 @@ class KinesisConsumerTest {
 //        every { constructedWith<Thread>(EqMatcher(scheduler)).start() } answers { }
 
         // when
-        sut.startAsDaemon("worker")
+        sut.startThread("worker")
         configuredShutdownHook.captured.start()
 
         // then

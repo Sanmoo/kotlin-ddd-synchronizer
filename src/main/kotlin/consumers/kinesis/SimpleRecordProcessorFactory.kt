@@ -1,5 +1,6 @@
-package com.github.sanmoo.consumers
+package com.github.sanmoo.consumers.kinesis
 
+import com.github.sanmoo.consumers.EventProcessor
 import software.amazon.kinesis.processor.ShardRecordProcessorFactory
 
 class SimpleRecordProcessorFactory(

@@ -1,7 +1,6 @@
 package consumers
 
-import com.diffplug.selfie.Selfie.expectSelfie
-import com.github.sanmoo.consumers.UpstreamStreamTracker
+import com.github.sanmoo.consumers.kinesis.UpstreamStreamTracker
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.Duration

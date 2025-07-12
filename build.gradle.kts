@@ -13,6 +13,9 @@ repositories {
 }
 
 dependencies {
+    // Kotlin Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+
     // AWS SDK
     implementation(platform("software.amazon.awssdk:bom:2.31.78"))
     implementation("software.amazon.awssdk:kinesis")

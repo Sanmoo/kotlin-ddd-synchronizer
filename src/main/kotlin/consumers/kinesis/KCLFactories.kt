@@ -1,8 +1,9 @@
-package com.github.sanmoo.consumers
+package com.github.sanmoo.consumers.kinesis
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.github.sanmoo.consumers.EventProcessor
 import com.github.sanmoo.messages.CommandDispatcher
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
@@ -27,7 +28,7 @@ class KCLFactories {
         val dynamodbAsyncClient = DynamoDbAsyncClient.builder().endpointOverride(uri).region(region).credentialsProvider(credentialsProvider).build()
         val cloudWatchAsyncClient = CloudWatchAsyncClient.builder().endpointOverride(uri).region(region).credentialsProvider(credentialsProvider).build()
         val sqsAsyncClient = SqsAsyncClient.builder().endpointOverride(uri).region(region).credentialsProvider(credentialsProvider).build()
-        val commandDispatcher = CommandDispatcher(sqsAsyncClient, objectMapper)
+        val commandDispatcher = CommandDispatcher(sqsAsyncClient, objectMapper, System::getenv)
 
         val configsBuilder = ConfigsBuilder(
             UpstreamStreamTracker(),

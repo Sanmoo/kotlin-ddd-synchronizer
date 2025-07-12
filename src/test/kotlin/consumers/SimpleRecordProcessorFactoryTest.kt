@@ -1,7 +1,7 @@
 package consumers
 
 import com.github.sanmoo.consumers.EventProcessor
-import com.github.sanmoo.consumers.SimpleRecordProcessorFactory
+import com.github.sanmoo.consumers.kinesis.SimpleRecordProcessorFactory
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals

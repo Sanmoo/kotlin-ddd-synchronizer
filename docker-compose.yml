@@ -6,7 +6,7 @@ services:
       - "4566:4566"            # LocalStack Gateway
       - "4510-4559:4510-4559"  # External services port range
     environment:
-      - SERVICES=kinesis,s3,dynamodb,cloudwatch
+      - SERVICES=kinesis,s3,dynamodb,cloudwatch,sqs
       - DEBUG=1
       - DOCKER_HOST=unix:///var/run/docker.sock
       - KINESIS_LATENCY=0
