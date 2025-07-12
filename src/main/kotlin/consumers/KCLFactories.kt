@@ -1,5 +1,7 @@
 package com.github.sanmoo.consumers
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.sanmoo.messages.CommandDispatcher
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import software.amazon.awssdk.regions.Region
@@ -20,6 +22,7 @@ class KCLFactories {
         val kinesisAsyncClient = KinesisAsyncClient.builder().endpointOverride(uri).region(region).credentialsProvider(credentialsProvider).build()
         val dynamodbAsyncClient = DynamoDbAsyncClient.builder().endpointOverride(uri).region(region).credentialsProvider(credentialsProvider).build()
         val cloudWatchAsyncClient = CloudWatchAsyncClient.builder().endpointOverride(uri).region(region).credentialsProvider(credentialsProvider).build()
+        val commandDispatcher = CommandDispatcher()
 
         val configsBuilder = ConfigsBuilder(
             UpstreamStreamTracker(),
@@ -28,7 +31,7 @@ class KCLFactories {
             dynamodbAsyncClient,
             cloudWatchAsyncClient,
             "single-worker",
-            SimpleRecordProcessorFactory((EventProcessor())::process),
+            SimpleRecordProcessorFactory((EventProcessor(jacksonObjectMapper(), commandDispatcher))::process),
         )
 
         return configsBuilder

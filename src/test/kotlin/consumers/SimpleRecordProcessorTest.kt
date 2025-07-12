@@ -4,6 +4,7 @@ import com.github.sanmoo.consumers.SimpleRecordProcessor
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,6 +28,11 @@ class SimpleRecordProcessorTest {
     fun setUp() {
         every { processor.invoke(any()) } just Runs
         sut = SimpleRecordProcessor(processor)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        confirmVerified(processor)
     }
 
     @Test
