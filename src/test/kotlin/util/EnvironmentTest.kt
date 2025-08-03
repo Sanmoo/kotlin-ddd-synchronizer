@@ -23,11 +23,11 @@ class EnvironmentTest {
         every { getenv.invoke("EXISTENT2") } returns "B"
 
         assertThrows(IllegalStateException::class.java) {
-            Environment(getenv).verifyVariables(arrayOf("NON_EXISTENT", "EXISTENT1"))
+            Environment(getenv).verifyVariables(listOf("NON_EXISTENT", "EXISTENT1"))
         }
 
         assertDoesNotThrow {
-            Environment(getenv).verifyVariables(arrayOf("EXISTENT1", "EXISTENT2"))
+            Environment(getenv).verifyVariables(listOf("EXISTENT1", "EXISTENT2"))
         }
 
         verifyAll {
