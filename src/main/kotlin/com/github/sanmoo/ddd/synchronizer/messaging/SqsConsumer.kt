@@ -5,6 +5,7 @@ import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -22,7 +23,9 @@ private const val MAX_PARALLEL_MESSAGES = 5
 class SqsConsumer(
     private val sqsClient: SqsAsyncClient,
     private val messageProcessor: MessageProcessor,
-    private val sqsProperties: SqsProperties
+    private val sqsProperties: SqsProperties,
+    @Value("\${sqs.queue-url}")
+    private val queueUrl: String
 ) : CoroutineScope {
     private val logger = LoggerFactory.getLogger(SqsConsumer::class.java)
     private val isRunning = AtomicBoolean(false)
@@ -73,9 +76,10 @@ class SqsConsumer(
         while (isRunning.get()) {
             try {
                 val receiveRequest = ReceiveMessageRequest.builder()
-                    .queueUrl(sqsProperties.queueUrl)
+                    .queueUrl(queueUrl)
                     .maxNumberOfMessages(sqsProperties.maxNumberOfMessages)
                     .waitTimeSeconds(sqsProperties.waitTimeSeconds)
+                    .visibilityTimeout(10)
                     .build()
 
                 val response = withContext(Dispatchers.IO) {
@@ -95,7 +99,7 @@ class SqsConsumer(
     private suspend fun deleteMessage(message: Message) {
         try {
             val deleteRequest = DeleteMessageRequest.builder()
-                .queueUrl(sqsProperties.queueUrl)
+                .queueUrl(queueUrl)
                 .receiptHandle(message.receiptHandle())
                 .build()
 

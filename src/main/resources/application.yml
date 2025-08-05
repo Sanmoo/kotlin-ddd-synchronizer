@@ -4,8 +4,8 @@ spring:
 
 sqs:
   region: ${AWS_REGION:us-east-1}
-  endpoint: ${SQS_ENDPOINT:}
-  queue-url: ${SQS_QUEUE_URL:}
+  endpoint: ${SQS_ENDPOINT:http://localhost:4566}
+  queue-url: ${SQS_QUEUE_URL:http://localhost:4566/000000000000/synchronizer-messages-queue.fifo}
   max-number-of-messages: 10
   wait-time-seconds: 20
 

@@ -1,15 +1,51 @@
+# ddd-synchronizer
+
+This is a Spring Boot application whose purpose is to help in a modernization project, by synchronizing data between
+two Bounded Contexts.
+
+TODO: Add more details
+
+# Kinds of Messages
+
+This application expects to receive two main type of messages: Events and Commands. Events are messages that
+represent domain events that happened in either Bounded Context.
+Commands integration actions that are intended to be executed by the integration context.
+
 # Development
 
-## Simulating event `resource.a.created`
+## Simulating a message that corresponds to an event communication `resource.a.created`
+
 ```bash
-awslocal kinesis put-record \
-  --stream-name resource-A-event-stream \
-  --partition-key "1" --data \
+awslocal sqs send-message \
+  --queue-url http://localhost:4566/000000000000/synchronizer-messages-queue.fifo \
+  --message-group-id "resource-a-123" \
+  --message-deduplication-id "$(date +%s)" \
+  --message-body \
   '{
-      "type": "resource.a.created",
-      "createdFromSystem": "OTHER_SYSTEM",
+      "type": "event",
+      "origination": "UpstreamBoundedContext",
       "eventId": "abc",
-      "id": "12",
-      "createdAt": "2023-06-01T00:00:00"
-   }'
+      "aggregateId": "123",
+      "createdAt": "2023-06-01T00:00:00.000Z",
+      "eventData": {
+        "type": "resource.a.created",
+        "data": {
+          "id": "123",
+          "name": "A"
+        }
+      }
+  }'
 ```
+
+If you need to purge the queue
+
+```bash
+awslocal sqs purge-queue --queue-url http://localhost:4566/000000000000/synchronizer-messages-queue.fifo
+```
+
+Important observations: As per the concept of Groups in SQS Fifo queues, you must have one group id per independent 
+integration flow. In this example application, every domain aggregate has its own group id. The consequence is that 
+events and commands from the same aggregate will be processed in strict order (it does not make sense to process them
+in a distinct order compared to the order in which they were produced). The group id in the example above is a concatenation
+between the aggregate type and the aggregate id (resource-a-123).
+

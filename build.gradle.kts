@@ -35,6 +35,11 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.8.1")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.8.1")
 
+	// Json Serialization
+	implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.3")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.3")
+
 	implementation("org.springframework.boot:spring-boot-starter-batch")
 	implementation("org.springframework.boot:spring-boot-starter-jdbc")
 	implementation("org.springframework.boot:spring-boot-starter-quartz")

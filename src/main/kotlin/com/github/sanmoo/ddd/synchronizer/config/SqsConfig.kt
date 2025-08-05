@@ -1,5 +1,6 @@
 package com.github.sanmoo.ddd.synchronizer.config
 
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import software.amazon.awssdk.regions.Region
@@ -16,18 +17,19 @@ class SqsConfig(
             .region(Region.of(sqsProperties.region))
 
         // For local development with LocalStack
-        if (sqsProperties.endpoint != null) {
-            builder.endpointOverride(URI.create(sqsProperties.endpoint))
+        sqsProperties.endpoint?.let {
+            builder.endpointOverride(URI.create(it))
         }
 
         return builder.build()
     }
 }
 
+@Configuration
+@ConfigurationProperties("sqs")
 data class SqsProperties(
-    val region: String = "us-east-1",
-    val endpoint: String? = null,
-    val queueUrl: String,
-    val maxNumberOfMessages: Int = 10,
-    val waitTimeSeconds: Int = 20
+    var region: String = "us-east-1",
+    var endpoint: String? = null,
+    var maxNumberOfMessages: Int = 10,
+    var waitTimeSeconds: Int = 20
 )
