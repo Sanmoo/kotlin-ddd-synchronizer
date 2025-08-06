@@ -1,8 +1,12 @@
+//import de.schablinski.gradle.activejdbc.ActiveJDBCInstrumentation
+
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
+	id("java")
 	id("org.springframework.boot") version "3.5.4"
 	id("io.spring.dependency-management") version "1.1.7"
+  	id("de.schablinski.activejdbc-gradle-plugin") version "2.0.1"
 }
 
 group = "com.github.sanmoo"
@@ -39,6 +43,10 @@ dependencies {
 	implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.3")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.3")
+
+	// ActiveJDBC
+	implementation("org.javalite:activejdbc:3.5-j11")
+	implementation("org.javalite:activejdbc-kt:3.4-j11")
 
 	implementation("org.springframework.boot:spring-boot-starter-batch")
 	implementation("org.springframework.boot:spring-boot-starter-jdbc")
