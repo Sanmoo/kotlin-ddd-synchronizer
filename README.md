@@ -21,20 +21,51 @@ awslocal sqs send-message \
   --message-group-id "resource-a-123" \
   --message-deduplication-id "$(date +%s)" \
   --message-body \
-  '{
-      "type": "event",
-      "origination": "UpstreamBoundedContext",
-      "eventId": "abc",
-      "aggregateId": "123",
-      "createdAt": "2023-06-01T00:00:00.000Z",
-      "eventData": {
-        "type": "resource.a.created",
-        "data": {
-          "id": "123",
-          "name": "A"
-        }
-      }
-  }'
+  <message-body-here>
+```
+
+### Event A Created Upstream Example Message
+```json
+{
+  "type": "event",
+  "origination": "UpstreamBoundedContext",
+  "eventId": "abc",
+  "aggregateId": "123",
+  "createdAt": "2023-06-01T00:00:00.000Z",
+  "event": {
+    "type": "resource.a.created.upstream",
+    "data": {
+      "id": "123",
+      "name": "A"
+    }
+  },
+  "command": {}
+}
+```
+
+### Event A Created Downstream Example Message
+```json
+{
+"todo": "todo"
+}
+```
+
+### Command Create Resource A Downstream Example Message
+```json
+{
+  "type": "command",
+  "commandId": "123",
+  "aggregateId": "123",
+  "createdAt": "2023-06-01T00:00:00.000Z",
+  "event": {},
+  "command": {
+    "type": "create.resource.a.downstream",
+    "data": {
+      "id": "123",
+      "name": "A"
+    }
+  }
+}
 ```
 
 If you need to purge the queue

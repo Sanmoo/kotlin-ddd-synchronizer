@@ -22,7 +22,19 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
+  postgres:
+    container_name: postgres
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./schema-legacy-ddl.sql:/docker-entrypoint-initdb.d/schema-legacy-ddl.sql
 
 volumes:
+  postgres_data:
   localstack_data:
     driver: local
