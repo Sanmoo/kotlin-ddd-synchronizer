@@ -1,6 +1,6 @@
 package com.github.sanmoo.ddd.synchronizer.legacy
 
-import com.github.sanmoo.ddd.synchronizer.legacy.persistency.models.Outbox
+import com.github.sanmoo.ddd.synchronizer.legacy.persistency.models.OutboxMessage
 import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.*
 import org.javalite.activejdbc.Base
@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.RowMapper
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicBoolean
@@ -28,6 +27,7 @@ class OutboxProcessor(
         if (isRunning.compareAndSet(false, true)) {
             logger.info("Starting OutboxProcessor")
             scope.launch {
+                Base.attach(jdbcTemplate.dataSource?.connection)
                 while (isRunning.get()) {
                     try {
                         processOutbox()
@@ -51,22 +51,11 @@ class OutboxProcessor(
 
     private suspend fun processOutbox() {
         // Use transaction to ensure we don't lose messages if processing fails
-        Base.attach(jdbcTemplate.dataSource?.connection)
-        jdbcTemplate.execute("BEGIN")
+        Base.openTransaction()
         try {
             // Lock and fetch a batch of messages (limit 10 at a time)
-            val messages = Outbox.findAll()
-
-//            val messages = jdbcTemplate.query(
-//                """
-//                SELECT id, event_body, created_at
-//                FROM outbox
-//                ORDER BY created_at
-//                LIMIT 10
-//                FOR UPDATE SKIP LOCKED
-//                """.trimIndent(),
-//                outboxRowMapper()
-//            )
+            val messages = OutboxMessage.findBySQL("select * from outbox order by created_at asc limit 10 for update skip " +
+                    "locked")
 
             if (messages.isNotEmpty()) {
                 logger.debug("Processing ${messages.size} outbox messages")
@@ -77,25 +66,22 @@ class OutboxProcessor(
                         processMessage(message)
                         
                         // Delete the processed message
-                        jdbcTemplate.update(
-                            "DELETE FROM outbox WHERE id = ?",
-                            message.id
-                        )
-                        logger.debug("Processed and deleted outbox message: ${message.id}")
+                        OutboxMessage.delete("id = ?", message.id)
+                        logger.debug("Processed and deleted outbox message: {}", message.id)
                     } catch (e: Exception) {
                         logger.error("Failed to process outbox message ${message.id}: ${e.message}", e)
                         // Continue with next message even if one fails
                     }
                 }
             }
-            jdbcTemplate.execute("COMMIT")
+            Base.commitTransaction()
         } catch (e: Exception) {
-            jdbcTemplate.execute("ROLLBACK")
+            Base.rollbackTransaction()
             throw e
         }
     }
 
-    private fun processMessage(message: Outbox) {
+    private fun processMessage(message: OutboxMessage) {
         // TODO: Implement actual message processing logic
         // For now, just log the message
         logger.info("Processing outbox message: ${message.id} - ${message.get("event_body")}...")

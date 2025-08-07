@@ -1,7 +1,13 @@
 spring:
   application:
     name: ddd-synchronizer
-
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: password
+  devtools:
+    restart:
+      exclude: "**/com/github/sanmoo/ddd/synchronizer/legacy/persistency/models/**"
 sqs:
   region: ${AWS_REGION:us-east-1}
   endpoint: ${SQS_ENDPOINT:http://localhost:4566}

@@ -1,9 +1,8 @@
-//import de.schablinski.gradle.activejdbc.ActiveJDBCInstrumentation
+import de.schablinski.gradle.activejdbc.ActiveJDBCInstrumentation
 
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
-	id("java")
 	id("org.springframework.boot") version "3.5.4"
 	id("io.spring.dependency-management") version "1.1.7"
   	id("de.schablinski.activejdbc-gradle-plugin") version "2.0.1"
@@ -48,12 +47,14 @@ dependencies {
 	implementation("org.javalite:activejdbc:3.5-j11")
 	implementation("org.javalite:activejdbc-kt:3.4-j11")
 
+	implementation("ch.qos.logback:logback-classic:1.5.18")
 	implementation("org.springframework.boot:spring-boot-starter-batch")
 	implementation("org.springframework.boot:spring-boot-starter-jdbc")
 	implementation("org.springframework.boot:spring-boot-starter-quartz")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	compileOnly("org.projectlombok:lombok")
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
+	// TODO: Investigate why this is conflicting with ActiveJDBC
+	// developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("com.h2database:h2")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
@@ -75,4 +76,18 @@ kotlin {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.register<ActiveJDBCInstrumentation>("instrumentKotlinModels") {
+	group = "build"
+	classesDir = sourceSets["main"].kotlin.classesDirectory.get().toString()
+	outputDir = sourceSets["main"].kotlin.classesDirectory.get().toString()
+}
+
+tasks.named("compileKotlin") {
+	finalizedBy("instrumentKotlinModels")
+}
+
+tasks.named("resolveMainClassName") {
+	dependsOn("instrumentKotlinModels")
 }
