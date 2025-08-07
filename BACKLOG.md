@@ -2,6 +2,9 @@
 
 [ ] Processing of Events from Legacy Bounded Context (originated in downstream outbox table)
     [ ] When event is originated by Integrator Action
+        [X] Connection with Legacy Database, using ActiveJDBC
+        [ ] Definition of Legacy Event Schema
+        [ ] Real processing of Legacy Event, creating one or more Commands for processing
     [ ] When not
 [ ] Processing of Events from New Bounded Context
     [ ] When event is originated by Integrator Action
