@@ -1,6 +1,6 @@
 package com.github.sanmoo.ddd.synchronizer.messaging
 
-import com.github.sanmoo.ddd.synchronizer.legacy.persistency.models.ResourceA
+import com.github.sanmoo.ddd.synchronizer.legacy.persistency.models.ResourceARecord
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.CommandSQSDispatcher
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.CreateResourceADownstream
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.CreateResourceAUpstream
@@ -41,7 +41,10 @@ class MessageProcessor(
 
                     Base.openTransaction()
                     try {
-                        ResourceA.create("id", message.resourceA.id, "name", message.resourceA.name)
+                        val resourceA = ResourceARecord.create("id", message.resourceA.id, "name", message.resourceA.name)
+                        resourceA.insert()
+                        val allResourceA =ResourceARecord.findAll()
+                        logger.info("All Resource A: $allResourceA")
                         Base.commitTransaction()
                     } catch (e: Exception) {
                         Base.rollbackTransaction()

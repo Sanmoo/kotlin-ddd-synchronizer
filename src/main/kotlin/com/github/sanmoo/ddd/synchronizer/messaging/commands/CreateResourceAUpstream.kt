@@ -1,6 +1,7 @@
 package com.github.sanmoo.ddd.synchronizer.messaging.commands
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.github.sanmoo.ddd.synchronizer.messaging.CREATE_RESOURCE_A_UPSTREAM
 import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
 import java.time.OffsetDateTime
 

@@ -3,8 +3,8 @@ package com.github.sanmoo.ddd.synchronizer.messaging.events
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.sanmoo.ddd.synchronizer.messaging.Message
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.Command
-import com.github.sanmoo.ddd.synchronizer.messaging.commands.RESOURCE_A_CREATED_DOWNSTREAM
-import com.github.sanmoo.ddd.synchronizer.messaging.commands.RESOURCE_A_CREATED_UPSTREAM
+import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_CREATED_DOWNSTREAM
+import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_CREATED_UPSTREAM
 import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
 import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
 import java.time.Clock

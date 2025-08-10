@@ -6,14 +6,15 @@
         [X] Definition of Legacy Event Schema
         [X] Real processing of Legacy Event, creating one or more Commands for processing
     [X] When not
-[ ] Processing of Events from New Bounded Context
-    [ ] When event is originated by Integrator Action
-    [ ] When not
+[X] Processing of Events from New Bounded Context
+    [X] When event is originated by Integrator Action
+    [X] When not
 [ ] Review: Commands need to be serialized, Events need to be deserialized. Remove functions in Message classes
 [ ] Processing of Commands CreateResourceADownstream and CreateResourceAUpstream
 [ ] Processing of Commands UpdateResourceADownstream and UpdateResourceAUpstream
 [ ] Processing of Commands CreateResourceBDownstream and CreateResourceBUpstream
 [ ] Review documentation and write down what needs improvement
+[ ] Test coverage for all classes and with Integration tests using In Memory H2 Database
 
 ## Legacy Event Data
 

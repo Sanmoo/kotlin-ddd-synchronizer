@@ -1,9 +1,8 @@
 package com.github.sanmoo.ddd.synchronizer.messaging.commands
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.github.sanmoo.ddd.synchronizer.messaging.CREATE_RESOURCE_A_DOWNSTREAM
 import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
-import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
 import java.time.OffsetDateTime
 
 data class CreateResourceADownstream(

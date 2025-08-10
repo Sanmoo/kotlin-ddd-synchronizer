@@ -5,6 +5,6 @@ import org.javalite.activejdbc.Model
 import org.javalite.activejdbc.annotations.Table
 
 @Table("resource_a")
-open class ResourceA(): Model() {
-    companion object: CompanionModel<ResourceA>(ResourceA::class.java)
+open class ResourceARecord(): Model() {
+    companion object: CompanionModel<ResourceARecord>(ResourceARecord::class.java)
 }

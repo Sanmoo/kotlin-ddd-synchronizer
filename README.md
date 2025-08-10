@@ -20,8 +20,9 @@ awslocal sqs send-message \
   --queue-url http://localhost:4566/000000000000/synchronizer-messages-queue.fifo \
   --message-group-id "resource-a-123" \
   --message-deduplication-id "$(date +%s)" \
-  --message-body \
-  <message-body-here>
+  --message-body '
+      <message-body-here>
+  '
 ```
 
 ### Event A Created Upstream Example Message
@@ -45,7 +46,18 @@ awslocal sqs send-message \
 ### Event A Created Downstream Example Message
 ```json
 {
-"todo": "todo"
+  "type": "event",
+  "origination": "DownstreamBoundedContext",
+  "id": "abc",
+  "aggregateId": "123",
+  "createdAt": "2023-06-01T00:00:00.000Z",
+  "event": {
+    "type": "resource.a.created.upstream",
+    "data": {
+      "id": "123",
+      "name": "A"
+    }
+  }
 }
 ```
 
