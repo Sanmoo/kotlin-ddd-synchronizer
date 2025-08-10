@@ -64,7 +64,9 @@ dependencies {
 	testImplementation("org.springframework.batch:spring-batch-test")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:postgresql")
+	testImplementation("com.diffplug.selfie:selfie-runner-junit5:2.5.3")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
     implementation(kotlin("stdlib-jdk8"))
 }
 
@@ -76,12 +78,21 @@ kotlin {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	environment(properties.filter { it.key == "selfie "})
+	inputs.files(fileTree("src/test") {
+		include("**/*.ss")
+	})
+	dependsOn("instrumentKotlinModels")
 }
 
 tasks.register<ActiveJDBCInstrumentation>("instrumentKotlinModels") {
 	group = "build"
 	classesDir = sourceSets["main"].kotlin.classesDirectory.get().toString()
 	outputDir = sourceSets["main"].kotlin.classesDirectory.get().toString()
+}
+
+tasks.getByName("bootJar") {
+
 }
 
 tasks.named("compileKotlin") {

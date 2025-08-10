@@ -3,7 +3,7 @@
 [ ] Processing of Events from Legacy Bounded Context (originated in downstream outbox table)
     [ ] When event is originated by Integrator Action
         [X] Connection with Legacy Database, using ActiveJDBC
-        [ ] Definition of Legacy Event Schema
+        [X] Definition of Legacy Event Schema
         [ ] Real processing of Legacy Event, creating one or more Commands for processing
     [ ] When not
 [ ] Processing of Events from New Bounded Context
@@ -13,3 +13,39 @@
 [ ] Processing of Commands UpdateResourceADownstream and UpdateResourceAUpstream
 [ ] Processing of Commands CreateResourceBDownstream and CreateResourceBUpstream
 [ ] Review documentation and write down what needs improvement
+
+## Legacy Event Data
+
+```json
+{
+  "data": "EVENT_DATA",
+  "datacontenttype": "application/json",
+  "id": "123",
+  "source": "core-system",
+  "type": "resource.a.created.downstream",
+  "time": "2020-01-01T00:00:00.000Z"
+}
+```
+
+```json
+{
+  "id": "123",
+  "name": "blable"
+}
+```
+
+### Example
+
+```json
+{
+  "data": {
+    "id": "123",
+    "name": "blable"
+  },
+  "datacontenttype": "application/json",
+  "id": "1234",
+  "source": "core-system",
+  "type": "resource.a.created.downstream",
+  "time": "2020-01-01T00:00:00.000Z"
+}
+```

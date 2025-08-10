@@ -1,26 +1,32 @@
 package com.github.sanmoo.ddd.synchronizer.messaging.events
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
+import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
 import java.time.OffsetDateTime
 
 data class ResourceACreatedUpstream(
     override val createdAt: OffsetDateTime,
     override val aggregateId: String,
     override val origination: String,
-    override val eventId: String,
-    val id: String,
-    val name: String,
-) : Event(createdAt, aggregateId, origination, eventId) {
+    override val id: String,
+    val resourceA: ResourceA,
+) : Event(createdAt, aggregateId, origination, id) {
     companion object {
-        fun from(createdAt: OffsetDateTime, aggregateId: String, node: JsonNode, origination: String, eventId: String):
-                ResourceACreatedUpstream =
-            ResourceACreatedUpstream(
+        fun from(
+            createdAt: OffsetDateTime,
+            aggregateId: String,
+            node: JsonNode,
+            origination: String,
+            id: String
+        ): ResourceACreatedUpstream {
+            return ResourceACreatedUpstream(
                 createdAt = createdAt,
                 aggregateId = aggregateId,
                 origination = origination,
-                eventId = eventId,
-                id = node.get("data").get("id").textValue(),
-                name = node.get("data").get("name").textValue()
+                id = id,
+                resourceA = StandardObjectMapper.INSTANCE.convertValue(node.get("data"), ResourceA::class.java)
             )
+        }
     }
 }

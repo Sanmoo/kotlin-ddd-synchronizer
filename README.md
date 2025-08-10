@@ -29,7 +29,7 @@ awslocal sqs send-message \
 {
   "type": "event",
   "origination": "UpstreamBoundedContext",
-  "eventId": "abc",
+  "id": "abc",
   "aggregateId": "123",
   "createdAt": "2023-06-01T00:00:00.000Z",
   "event": {
@@ -54,7 +54,7 @@ awslocal sqs send-message \
 ```json
 {
   "type": "command",
-  "commandId": "123",
+  "id": "123",
   "aggregateId": "123",
   "createdAt": "2023-06-01T00:00:00.000Z",
   "event": {},
@@ -68,15 +68,13 @@ awslocal sqs send-message \
 }
 ```
 
-If you need to purge the queue
+## Creating Events in Legacy Database
 
-```bash
-awslocal sqs purge-queue --queue-url http://localhost:4566/000000000000/synchronizer-messages-queue.fifo
+```sql
+INSERT INTO outbox (id, event_body, created_at)
+VALUES (
+    '123421',
+    '{"data": {id": "123", "name": "A"}, "id": " || uuid_generate_v4() || ", "type": "resource.a.created.downstream"}',
+    '2023-06-01T00:00:00.000Z'
+);
 ```
-
-Important observations: As per the concept of Groups in SQS Fifo queues, you must have one group id per independent 
-integration flow. In this example application, every domain aggregate has its own group id. The consequence is that 
-events and commands from the same aggregate will be processed in strict order (it does not make sense to process them
-in a distinct order compared to the order in which they were produced). The group id in the example above is a concatenation
-between the aggregate type and the aggregate id (resource-a-123).
-

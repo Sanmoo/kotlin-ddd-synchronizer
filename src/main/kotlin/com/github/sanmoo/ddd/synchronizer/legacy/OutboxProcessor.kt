@@ -1,25 +1,36 @@
 package com.github.sanmoo.ddd.synchronizer.legacy
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.sanmoo.ddd.synchronizer.legacy.persistency.models.OutboxMessage
+import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
 import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.*
 import org.javalite.activejdbc.Base
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
+import java.time.Clock
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
 class OutboxProcessor(
-    private val jdbcTemplate: JdbcTemplate
+    private val jdbcTemplate: JdbcTemplate,
+    private val sqsClient: SqsAsyncClient,
+    @Value("\${sqs.queue-url}")
+    private val queueUrl: String
 ) {
     private val logger = LoggerFactory.getLogger(OutboxProcessor::class.java)
     private val isRunning = AtomicBoolean(false)
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.IO + job)
+    private val objectMapper = StandardObjectMapper.INSTANCE
 
     @EventListener(ApplicationReadyEvent::class)
     @Async
@@ -82,9 +93,21 @@ class OutboxProcessor(
     }
 
     private fun processMessage(message: OutboxMessage) {
-        // TODO: Implement actual message processing logic
-        // For now, just log the message
         logger.info("Processing outbox message: ${message.id} - ${message.get("event_body")}...")
-        // Add your business logic here
+
+        val command = EventToCommandTranslator(Clock.systemUTC()) { -> UUID::randomUUID.toString() }.translate(
+            StandardObjectMapper.INSTANCE.readTree(message.get("event_body").toString()) as ObjectNode
+        )
+
+        val receiveRequest = SendMessageRequest.builder()
+            .queueUrl(queueUrl)
+            .messageBody(objectMapper.writeValueAsString(command.toObjectNode()))
+            .messageGroupId("resource-a-${command.aggregateId}")
+            .messageDeduplicationId(command.id)
+            .build()
+
+        sqsClient.sendMessage(receiveRequest).get()
+
+        logger.info("Event ${message.id} processed")
     }
 }

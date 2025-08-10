@@ -18,8 +18,8 @@ class DefaultMessageProcessor : MessageProcessor {
             // TODO: Implement your message processing logic here
             val content = message.body()
             val jsonNode = StandardObjectMapper.INSTANCE.readTree(content)
-            val message = com.github.sanmoo.ddd.synchronizer.messaging.Message.from(jsonNode)
-            println("Message parsed: $message")
+            val parsed = com.github.sanmoo.ddd.synchronizer.messaging.Message.from(jsonNode)
+            println("Message parsed: $parsed")
             // If processing is successful, return true to delete the message
             return true
         } catch (e: Exception) {
