@@ -38,7 +38,6 @@ class OutboxProcessor(
         if (isRunning.compareAndSet(false, true)) {
             logger.info("Starting OutboxProcessor")
             scope.launch {
-                Base.attach(jdbcTemplate.dataSource?.connection)
                 while (isRunning.get()) {
                     try {
                         processOutbox()
@@ -62,6 +61,9 @@ class OutboxProcessor(
 
     private suspend fun processOutbox() {
         // Use transaction to ensure we don't lose messages if processing fails
+        if (!Base.hasConnection()) {
+            Base.attach(jdbcTemplate.dataSource?.connection)
+        }
         Base.openTransaction()
         try {
             // Lock and fetch a batch of messages (limit 10 at a time)
@@ -95,14 +97,14 @@ class OutboxProcessor(
     private fun processMessage(message: OutboxMessage) {
         logger.info("Processing outbox message: ${message.id} - ${message.get("event_body")}...")
 
-        val command = EventToCommandTranslator(Clock.systemUTC()) { -> UUID::randomUUID.toString() }.translate(
+        val command = EventToCommandTranslator(Clock.systemUTC()) { -> UUID.randomUUID().toString() }.translate(
             StandardObjectMapper.INSTANCE.readTree(message.get("event_body").toString()) as ObjectNode
         )
 
         val receiveRequest = SendMessageRequest.builder()
             .queueUrl(queueUrl)
             .messageBody(objectMapper.writeValueAsString(command.toObjectNode()))
-            .messageGroupId("resource-a-${command.aggregateId}")
+            .messageGroupId("resource1a1${command.aggregateId}")
             .messageDeduplicationId(command.id)
             .build()
 
