@@ -6,8 +6,6 @@
         [X] Definition of Legacy Event Schema
         [X] Real processing of Legacy Event, creating one or more Commands for processing
     [X] When not
-[ ] Configure DBUI properly in NeoVIM
-    [ ] Want to version queries and connection data.
 [ ] Processing of Events from New Bounded Context
     [ ] When event is originated by Integrator Action
     [ ] When not
