@@ -12,16 +12,6 @@ data class CreateResourceADownstream(
     override val id: String,
     val resourceA: ResourceA,
 ) : Command(createdAt, aggregateId, id) {
-    companion object {
-        fun from(createdAt: OffsetDateTime, aggregateId: String, id: String, node: JsonNode):
-                CreateResourceADownstream = CreateResourceADownstream(
-            createdAt = createdAt,
-            aggregateId = aggregateId,
-            id = id,
-            resourceA = StandardObjectMapper.INSTANCE.treeToValue(node.get("data"), ResourceA::class.java)
-        )
-    }
-
     override fun toObjectNode(): ObjectNode {
         val jsonNode = super.toObjectNode()
         val commandNode: ObjectNode = jsonNode.get("command") as ObjectNode

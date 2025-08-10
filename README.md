@@ -38,8 +38,7 @@ awslocal sqs send-message \
       "id": "123",
       "name": "A"
     }
-  },
-  "command": {}
+  }
 }
 ```
 

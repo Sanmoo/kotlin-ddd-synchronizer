@@ -5,6 +5,6 @@ import org.javalite.activejdbc.Model
 import org.javalite.activejdbc.annotations.Table
 
 @Table("outbox")
-open class OutboxMessage(): Model() {
-    companion object: CompanionModel<OutboxMessage>(OutboxMessage::class.java)
+open class OutboxRecord(): Model() {
+    companion object: CompanionModel<OutboxRecord>(OutboxRecord::class.java)
 }

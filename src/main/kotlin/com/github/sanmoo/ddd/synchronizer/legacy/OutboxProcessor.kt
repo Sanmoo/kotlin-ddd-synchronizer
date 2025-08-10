@@ -1,30 +1,27 @@
 package com.github.sanmoo.ddd.synchronizer.legacy
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.github.sanmoo.ddd.synchronizer.legacy.persistency.models.OutboxMessage
+import com.github.sanmoo.ddd.synchronizer.legacy.persistency.models.OutboxRecord
+import com.github.sanmoo.ddd.synchronizer.messaging.Message
+import com.github.sanmoo.ddd.synchronizer.messaging.commands.CommandSQSDispatcher
+import com.github.sanmoo.ddd.synchronizer.messaging.events.Event
 import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
 import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.*
 import org.javalite.activejdbc.Base
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
-import software.amazon.awssdk.services.sqs.SqsAsyncClient
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import java.time.Clock
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
 class OutboxProcessor(
     private val jdbcTemplate: JdbcTemplate,
-    private val sqsClient: SqsAsyncClient,
-    @Value("\${sqs.queue-url}")
-    private val queueUrl: String
+    private val commandSQSDispatcher: CommandSQSDispatcher,
 ) {
     private val logger = LoggerFactory.getLogger(OutboxProcessor::class.java)
     private val isRunning = AtomicBoolean(false)
@@ -67,19 +64,21 @@ class OutboxProcessor(
         Base.openTransaction()
         try {
             // Lock and fetch a batch of messages (limit 10 at a time)
-            val messages = OutboxMessage.findBySQL("select * from outbox order by created_at asc limit 10 for update skip " +
-                    "locked")
+            val messages = OutboxRecord.findBySQL(
+                "select * from outbox order by created_at asc limit 10 for update skip " +
+                        "locked"
+            )
 
             if (messages.isNotEmpty()) {
                 logger.debug("Processing ${messages.size} outbox messages")
-                
+
                 for (message in messages) {
                     try {
                         // Process the message
                         processMessage(message)
-                        
+
                         // Delete the processed message
-                        OutboxMessage.delete("id = ?", message.id)
+                        OutboxRecord.delete("id = ?", message.id)
                         logger.debug("Processed and deleted outbox message: {}", message.id)
                     } catch (e: Exception) {
                         logger.error("Failed to process outbox message ${message.id}: ${e.message}", e)
@@ -94,26 +93,11 @@ class OutboxProcessor(
         }
     }
 
-    private fun processMessage(message: OutboxMessage) {
-        logger.info("Processing outbox message: ${message.id} - ${message.get("event_body")}...")
-
-        val command = EventToCommandTranslator(Clock.systemUTC()) { -> UUID.randomUUID().toString() }.translate(
-            StandardObjectMapper.INSTANCE.readTree(message.get("event_body").toString()) as ObjectNode
-        )
-
-        if (command == null) {
-            return
-        }
-
-        val receiveRequest = SendMessageRequest.builder()
-            .queueUrl(queueUrl)
-            .messageBody(objectMapper.writeValueAsString(command.toObjectNode()))
-            .messageGroupId("resource1a1${command.aggregateId}")
-            .messageDeduplicationId(command.id)
-            .build()
-
-        sqsClient.sendMessage(receiveRequest).get()
-
-        logger.info("Event ${message.id} processed")
+    private fun processMessage(message: OutboxRecord) {
+        val eventNode = objectMapper.readTree(message.get("event_body").toString())
+        commandSQSDispatcher.dispatch((Message.from(eventNode) as Event).toCommandList(Clock.systemUTC()) { ->
+            UUID.randomUUID().toString()
+        })
+        logger.info("Processed outbox message: ${message.id} - ${message.get("event_body")}...")
     }
 }

@@ -2,9 +2,15 @@ package com.github.sanmoo.ddd.synchronizer.messaging.events
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.sanmoo.ddd.synchronizer.messaging.Message
+import com.github.sanmoo.ddd.synchronizer.messaging.commands.Command
+import com.github.sanmoo.ddd.synchronizer.messaging.commands.RESOURCE_A_CREATED_DOWNSTREAM
+import com.github.sanmoo.ddd.synchronizer.messaging.commands.RESOURCE_A_CREATED_UPSTREAM
+import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
+import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
+import java.time.Clock
 import java.time.OffsetDateTime
 
-open class Event(
+abstract class Event(
     override val createdAt: OffsetDateTime,
     override val aggregateId: String,
     open val origination: String,
@@ -19,16 +25,27 @@ open class Event(
             node: JsonNode
         ): Event {
             return when (node.get("type").textValue()) {
-                "resource.a.created.upstream" -> ResourceACreatedUpstream.from(
+                RESOURCE_A_CREATED_UPSTREAM -> ResourceACreatedUpstream(
                     aggregateId = aggregateId,
                     createdAt = createdAt,
-                    node = node,
                     origination = origination,
-                    id = id
+                    id = id,
+                    resourceA = StandardObjectMapper.INSTANCE.convertValue(node.get("data"), ResourceA::class.java)
+                )
+
+                RESOURCE_A_CREATED_DOWNSTREAM -> ResourceACreatedDownstream(
+                    aggregateId = aggregateId,
+                    createdAt = createdAt,
+                    origination = origination,
+                    id = id,
+                    resourceA = StandardObjectMapper.INSTANCE.convertValue(node.get("data"), ResourceA::class.java)
                 )
 
                 else -> throw Exception("Unknown event type: ${node.get("type").textValue()}")
             }
         }
     }
+
+    // Events are translated to a list of commands that the integrator is expected to process
+    abstract fun toCommandList(clock: Clock, uuidProvider: () -> String): List<Command>
 }

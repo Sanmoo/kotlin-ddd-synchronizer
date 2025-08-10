@@ -8,7 +8,7 @@ import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
-open class Message(
+abstract class Message(
     open val aggregateId: String,
     open val createdAt: OffsetDateTime,
     open val id: String
@@ -30,6 +30,7 @@ open class Message(
                         id = id
                     )
                 }
+
                 "command" -> {
                     return Command.from(
                         aggregateId = aggregateId,
@@ -38,6 +39,7 @@ open class Message(
                         node = jsonNode.get("command")
                     )
                 }
+
                 else -> throw IllegalArgumentException("Unknown message type: ${jsonNode.get("type").textValue()}")
             }
         }

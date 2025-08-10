@@ -9,6 +9,7 @@
 [ ] Processing of Events from New Bounded Context
     [ ] When event is originated by Integrator Action
     [ ] When not
+[ ] Review: Commands need to be serialized, Events need to be deserialized. Remove functions in Message classes
 [ ] Processing of Commands CreateResourceADownstream and CreateResourceAUpstream
 [ ] Processing of Commands UpdateResourceADownstream and UpdateResourceAUpstream
 [ ] Processing of Commands CreateResourceBDownstream and CreateResourceBUpstream
