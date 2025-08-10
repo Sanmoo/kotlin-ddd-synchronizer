@@ -9,12 +9,12 @@
 [X] Processing of Events from New Bounded Context
     [X] When event is originated by Integrator Action
     [X] When not
-[ ] Review: Commands need to be serialized, Events need to be deserialized. Remove functions in Message classes
-[ ] Processing of Commands CreateResourceADownstream and CreateResourceAUpstream
-[ ] Processing of Commands UpdateResourceADownstream and UpdateResourceAUpstream
-[ ] Processing of Commands CreateResourceBDownstream and CreateResourceBUpstream
-[ ] Review documentation and write down what needs improvement
+[X] Review: Commands need to be serialized, Events need to be deserialized. Remove functions in Message classes
+[X] Processing of Commands CreateResourceADownstream and CreateResourceAUpstream
+[X] Processing of Commands UpdateResourceADownstream and UpdateResourceAUpstream
 [ ] Test coverage for all classes and with Integration tests using In Memory H2 Database
+[ ] Test Coverage configuration with minimal threshold
+[ ] Review documentation and write down what needs improvement
 
 ## Legacy Event Data
 

@@ -5,6 +5,8 @@ import com.github.sanmoo.ddd.synchronizer.messaging.Message
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.Command
 import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_CREATED_DOWNSTREAM
 import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_CREATED_UPSTREAM
+import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_UPDATED_DOWNSTREAM
+import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_UPDATED_UPSTREAM
 import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
 import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
 import java.time.Clock
@@ -34,6 +36,22 @@ abstract class Event(
                 )
 
                 RESOURCE_A_CREATED_DOWNSTREAM -> ResourceACreatedDownstream(
+                    aggregateId = aggregateId,
+                    createdAt = createdAt,
+                    origination = origination,
+                    id = id,
+                    resourceA = StandardObjectMapper.INSTANCE.convertValue(node.get("data"), ResourceA::class.java)
+                )
+
+                RESOURCE_A_UPDATED_DOWNSTREAM -> ResourceAUpdatedDownstream(
+                    aggregateId = aggregateId,
+                    createdAt = createdAt,
+                    origination = origination,
+                    id = id,
+                    resourceA = StandardObjectMapper.INSTANCE.convertValue(node.get("data"), ResourceA::class.java)
+                )
+
+                RESOURCE_A_UPDATED_UPSTREAM -> ResourceAUpdatedUpstream(
                     aggregateId = aggregateId,
                     createdAt = createdAt,
                     origination = origination,

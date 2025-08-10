@@ -4,7 +4,10 @@ import com.github.sanmoo.ddd.synchronizer.legacy.persistency.models.ResourceARec
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.CommandSQSDispatcher
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.CreateResourceADownstream
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.CreateResourceAUpstream
+import com.github.sanmoo.ddd.synchronizer.messaging.commands.UpdateResourceADownstream
+import com.github.sanmoo.ddd.synchronizer.messaging.commands.UpdateResourceAUpstream
 import com.github.sanmoo.ddd.synchronizer.messaging.events.Event
+import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
 import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
 import org.javalite.activejdbc.Base
 import org.slf4j.LoggerFactory
@@ -34,24 +37,15 @@ class MessageProcessor(
                 if (message is CreateResourceAUpstream) {
                     logger.info("Create Resource A Upstream: Consuming... an API to create Resource A Upstream")
                     logger.info("Done")
+                } else if (message is UpdateResourceAUpstream) {
+                    logger.info("Update Resource A Upstream: Consuming... an API to update Resource A Upstream")
+                    logger.info("Done")
                 } else if (message is CreateResourceADownstream) {
-                    if (!Base.hasConnection()) {
-                        Base.attach(jdbcTemplate.dataSource?.connection)
-                    }
-
-                    Base.openTransaction()
-                    try {
-                        val resourceA = ResourceARecord.create("id", message.resourceA.id, "name", message.resourceA.name)
-                        resourceA.insert()
-                        val allResourceA =ResourceARecord.findAll()
-                        logger.info("All Resource A: $allResourceA")
-                        Base.commitTransaction()
-                    } catch (e: Exception) {
-                        Base.rollbackTransaction()
-                        throw e
-                    }
-
+                    processResource(message.resourceA, true)
                     logger.info("Created Resource A Downstream successfully")
+                } else if (message is UpdateResourceADownstream) {
+                    processResource(message.resourceA, false)
+                    logger.info("Updated Resource A Downstream successfully")
                 }
             }
 
@@ -63,6 +57,25 @@ class MessageProcessor(
             println("Error processing message: ${e.message}")
             e.printStackTrace()
             return false
+        }
+    }
+
+    private fun processResource(resourceA: ResourceA, creation: Boolean): Unit {
+        if (!Base.hasConnection()) {
+            Base.attach(jdbcTemplate.dataSource?.connection)
+        }
+        Base.openTransaction()
+        try {
+            val resourceA = ResourceARecord.create("id", resourceA.id, "name", resourceA.name)
+            if (creation) {
+                resourceA.insert()
+            } else {
+                resourceA.saveIt()
+            }
+            Base.commitTransaction()
+        } catch (e: Exception) {
+            Base.rollbackTransaction()
+            throw e
         }
     }
 }

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.sanmoo.ddd.synchronizer.messaging.CREATE_RESOURCE_A_DOWNSTREAM
 import com.github.sanmoo.ddd.synchronizer.messaging.CREATE_RESOURCE_A_UPSTREAM
 import com.github.sanmoo.ddd.synchronizer.messaging.Message
+import com.github.sanmoo.ddd.synchronizer.messaging.UPDATE_RESOURCE_A_DOWNSTREAM
+import com.github.sanmoo.ddd.synchronizer.messaging.UPDATE_RESOURCE_A_UPSTREAM
 import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
 import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
 import java.time.OffsetDateTime
@@ -26,6 +28,20 @@ abstract class Command(
                 )
 
                 CREATE_RESOURCE_A_UPSTREAM -> CreateResourceAUpstream(
+                    aggregateId = aggregateId,
+                    createdAt = createdAt,
+                    id = id,
+                    resourceA = StandardObjectMapper.INSTANCE.treeToValue(node.get("data"), ResourceA::class.java)
+                )
+
+                UPDATE_RESOURCE_A_DOWNSTREAM -> UpdateResourceADownstream(
+                    aggregateId = aggregateId,
+                    createdAt = createdAt,
+                    id = id,
+                    resourceA = StandardObjectMapper.INSTANCE.treeToValue(node.get("data"), ResourceA::class.java)
+                )
+
+                UPDATE_RESOURCE_A_UPSTREAM -> UpdateResourceAUpstream(
                     aggregateId = aggregateId,
                     createdAt = createdAt,
                     id = id,
