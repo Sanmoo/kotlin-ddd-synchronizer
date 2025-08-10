@@ -101,6 +101,10 @@ class OutboxProcessor(
             StandardObjectMapper.INSTANCE.readTree(message.get("event_body").toString()) as ObjectNode
         )
 
+        if (command == null) {
+            return
+        }
+
         val receiveRequest = SendMessageRequest.builder()
             .queueUrl(queueUrl)
             .messageBody(objectMapper.writeValueAsString(command.toObjectNode()))

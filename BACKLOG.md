@@ -1,11 +1,13 @@
 # Tasks
 
-[ ] Processing of Events from Legacy Bounded Context (originated in downstream outbox table)
-    [ ] When event is originated by Integrator Action
+[X] Processing of Events from Legacy Bounded Context (originated in downstream outbox table)
+    [X] When event is originated by Integrator Action
         [X] Connection with Legacy Database, using ActiveJDBC
         [X] Definition of Legacy Event Schema
-        [ ] Real processing of Legacy Event, creating one or more Commands for processing
-    [ ] When not
+        [X] Real processing of Legacy Event, creating one or more Commands for processing
+    [X] When not
+[ ] Configure DBUI properly in NeoVIM
+    [ ] Want to version queries and connection data.
 [ ] Processing of Events from New Bounded Context
     [ ] When event is originated by Integrator Action
     [ ] When not
