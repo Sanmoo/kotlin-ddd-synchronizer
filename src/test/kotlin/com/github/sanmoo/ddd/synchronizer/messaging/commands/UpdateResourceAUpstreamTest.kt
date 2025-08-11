@@ -1,14 +1,14 @@
 package com.github.sanmoo.ddd.synchronizer.messaging.commands
 
 import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
+import org.junit.jupiter.api.Test
 import selfie.SelfieSettings.Companion.expectSelfie
 import java.time.OffsetDateTime
-import kotlin.test.Test
 
-class CreateResourceAUpstreamTest {
+class UpdateResourceAUpstreamTest {
     @Test
-    fun testToJsonNode() {
-        val command = CreateResourceAUpstream(
+    fun testToObjectNode() {
+        val command = UpdateResourceAUpstream(
             createdAt = OffsetDateTime.parse("2023-06-01T00:00:00.000Z"),
             aggregateId = "123",
             id = "abc",

@@ -65,6 +65,8 @@ dependencies {
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:postgresql")
 	testImplementation("com.diffplug.selfie:selfie-runner-junit5:2.5.3")
+	testImplementation("io.mockk:mockk:1.14.5")
+
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     implementation(kotlin("stdlib-jdk8"))

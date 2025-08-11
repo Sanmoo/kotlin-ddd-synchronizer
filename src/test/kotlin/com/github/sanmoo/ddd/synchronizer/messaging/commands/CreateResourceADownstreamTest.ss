@@ -1,6 +1,4 @@
-╔═ testFrom ═╗
-CreateResourceADownstream(createdAt=2023-06-01T00:00Z, aggregateId=123, id=abc, resourceA=ResourceA(id=123, name=A))
-╔═ testToJsonNode ═╗
+╔═ testToObjectNode ═╗
 {
   "id" : "abc",
   "aggregateId" : "123",
