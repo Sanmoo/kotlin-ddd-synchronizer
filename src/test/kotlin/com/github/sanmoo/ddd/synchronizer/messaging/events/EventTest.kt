@@ -1,36 +1,37 @@
-package com.github.sanmoo.ddd.synchronizer.messaging.commands
+package com.github.sanmoo.ddd.synchronizer.messaging.events
 
 import com.github.sanmoo.ddd.synchronizer.messaging.Message
 import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import selfie.SelfieSettings.Companion.expectSelfie
-import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class CommandTest {
+class EventTest {
     companion object {
         @JvmStatic
         fun testData(): List<Arguments> {
             return listOf(
-                arguments("create-resource-a-upstream", this.buildCommandJson("create.resource.a.upstream")),
-                arguments("update-resource-a-upstream", this.buildCommandJson("update.resource.a.upstream")),
-                arguments("create-resource-a-downstream", this.buildCommandJson("create.resource.a.downstream")),
-                arguments("update-resource-a-downstream", this.buildCommandJson("update.resource.a.downstream"))
+                arguments("resource-a-created-downstream", this.buildEventJson("resource.a.created.downstream")),
+                arguments("resource-a-created-upstream", this.buildEventJson("resource.a.created.upstream")),
+                arguments("resource-a-updated-downstream", this.buildEventJson("resource.a.updated.downstream")),
+                arguments("resource-a-updated-upstream", this.buildEventJson("resource.a.updated.upstream"))
             )
         }
 
-        fun buildCommandJson(type: String): String {
+        fun buildEventJson(type: String): String {
             return """
                 {
-                    "type": "command",
+                    "type": "event",
                     "id": "abc",
                     "aggregateId": "123",
                     "createdAt": "2023-06-01T00:00:00.000Z",
-                    "command": {
+                    "origination": "system-whatever",
+                    "event": {
                         "type": "$type",
                         "data": {
                             "id": "123",
@@ -50,11 +51,11 @@ class CommandTest {
     }
 
     @Test
-    fun testFromWhenCommandTypeIsUnknown() {
+    fun testFromWhenEventTypeIsUnknown() {
         val exception = assertFailsWith<Exception> {
-            Message.from(StandardObjectMapper.INSTANCE.readTree(buildCommandJson("unknown")))
+            Message.from(StandardObjectMapper.INSTANCE.readTree(buildEventJson("unknown")))
         }
 
-        assertEquals("Unknown command type: unknown", exception.message)
+        assertEquals("Unknown event type: unknown", exception.message)
     }
 }
