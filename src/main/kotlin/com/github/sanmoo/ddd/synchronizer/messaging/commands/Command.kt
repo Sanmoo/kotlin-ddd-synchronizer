@@ -48,7 +48,7 @@ abstract class Command(
                     resourceA = StandardObjectMapper.INSTANCE.treeToValue(node.get("data"), ResourceA::class.java)
                 )
 
-                else -> throw Exception("Unknown event type: ${node.get("type").textValue()}")
+                else -> throw Exception("Unknown command type: ${node.get("type").textValue()}")
             }
         }
     }
