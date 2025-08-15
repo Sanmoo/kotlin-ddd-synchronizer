@@ -14,14 +14,14 @@ import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import java.time.Clock
-import java.util.*
 import software.amazon.awssdk.services.sqs.model.Message as SqsMessage
 
 @Component
 class MessageProcessor(
     val clock: Clock,
     val commandDispatcher: CommandSQSDispatcher,
-    val jdbcTemplate: JdbcTemplate
+    val jdbcTemplate: JdbcTemplate,
+    val supplier: () -> String,
 ) {
     private val logger = LoggerFactory.getLogger(MessageProcessor::class.java)
 
@@ -32,7 +32,7 @@ class MessageProcessor(
             val message = Message.from(jsonNode)
 
             if (message is Event) {
-                commandDispatcher.dispatch(message.toCommandList(clock) { UUID.randomUUID().toString() })
+                commandDispatcher.dispatch(message.toCommandList(clock, supplier))
             } else {
                 if (message is CreateResourceAUpstream) {
                     logger.info("Create Resource A Upstream: Consuming... an API to create Resource A Upstream")

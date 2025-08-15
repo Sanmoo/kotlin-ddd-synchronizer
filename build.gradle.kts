@@ -6,6 +6,7 @@ plugins {
 	id("org.springframework.boot") version "3.5.4"
 	id("io.spring.dependency-management") version "1.1.7"
   	id("de.schablinski.activejdbc-gradle-plugin") version "2.0.1"
+	id("io.freefair.lombok") version "8.13.1"
 }
 
 group = "com.github.sanmoo"
@@ -37,6 +38,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.8.1")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.8.1")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 
 	// Json Serialization
 	implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")

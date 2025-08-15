@@ -18,6 +18,9 @@ class SelfieSettings : SelfieSettingsAPI() {
         }
 
         fun expectSelfie(message: Message): StringSelfie = Selfie.expectSelfie(message.toString())
+        fun expectSelfie(messages: List<Message>): StringSelfie {
+            return Selfie.expectSelfie(messages.joinToString("\n", transform = Message::toString))
+        }
         fun expectSelfie(string: String): StringSelfie = Selfie.expectSelfie(string)
         fun expectSelfie(objectNode: ObjectNode): StringSelfie = Selfie.expectSelfie(objectNode, OBJECT_NODE_CAMERA)
     }

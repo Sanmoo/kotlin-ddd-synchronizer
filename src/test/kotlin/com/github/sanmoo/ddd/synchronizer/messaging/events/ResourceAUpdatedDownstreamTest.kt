@@ -1,6 +1,7 @@
 package com.github.sanmoo.ddd.synchronizer.messaging.events
 
 import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import selfie.SelfieSettings.Companion.expectSelfie
 import java.time.Clock
@@ -15,18 +16,31 @@ class ResourceAUpdatedDownstreamTest {
 
     @Test
     fun testToCommandList() {
-        val event = ResourceAUpdatedDownstream(
-            createdAt = OffsetDateTime.now(clock),
-            aggregateId = "123",
-            id = "abc",
-            origination = "downstream-system",
-            resourceA = ResourceA("123", "A")
-        )
+        val event = getEvent("downstream-system")
 
         val commandList = event.toCommandList(clock) { "uuid" }
 
         for (i in 1..commandList.size) {
             expectSelfie(commandList[i - 1]).toMatchDisk("command $i")
         }
+    }
+
+    @Test
+    fun testToCommandListWhenNoCommandsAreCreated() {
+        val event = getEvent("upstream-system")
+
+        val commandList = event.toCommandList(clock) { "uuid" }
+        assertEquals(0, commandList.size)
+    }
+
+    private fun getEvent(origination: String): ResourceAUpdatedDownstream {
+        val event = ResourceAUpdatedDownstream(
+            createdAt = OffsetDateTime.now(clock),
+            aggregateId = "123",
+            id = "abc",
+            origination = origination,
+            resourceA = ResourceA("123", "A")
+        )
+        return event
     }
 }

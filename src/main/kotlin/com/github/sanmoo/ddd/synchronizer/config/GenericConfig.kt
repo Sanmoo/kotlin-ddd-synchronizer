@@ -10,4 +10,9 @@ class GenericConfig {
     fun clock(): Clock {
         return Clock.systemDefaultZone()
     }
+
+    @Bean
+    fun uuidProvider(): () -> String {
+        return { java.util.UUID.randomUUID().toString() }
+    }
 }
