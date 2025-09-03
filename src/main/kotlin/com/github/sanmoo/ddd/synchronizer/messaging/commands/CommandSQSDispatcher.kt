@@ -1,6 +1,6 @@
 package com.github.sanmoo.ddd.synchronizer.messaging.commands
 
-import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
+import com.github.sanmoo.ddd.synchronizer.util.OBJECT_MAPPER
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
@@ -12,13 +12,11 @@ class CommandSQSDispatcher(
     @Value("\${sqs.queue-url}")
     private val queueUrl: String
 ) {
-    private val objectMapper = StandardObjectMapper.INSTANCE
-
     fun dispatch(commands: List<Command>) {
         commands.map {
             SendMessageRequest.builder()
                 .queueUrl(queueUrl)
-                .messageBody(objectMapper.writeValueAsString(it.toObjectNode()))
+                .messageBody(OBJECT_MAPPER.writeValueAsString(it.toObjectNode()))
                 // TODO: resource1a1 should not be hardcoded here, instead should be provided by the Command object
                 //  itself
                 .messageGroupId("resource1a1${it.aggregateId}")

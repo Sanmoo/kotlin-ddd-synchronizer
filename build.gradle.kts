@@ -7,6 +7,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
   	id("de.schablinski.activejdbc-gradle-plugin") version "2.0.1"
 	id("io.freefair.lombok") version "8.13.1"
+	id("org.jetbrains.kotlinx.kover") version "0.9.1"
 }
 
 group = "com.github.sanmoo"
@@ -38,6 +39,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.8.1")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.8.1")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 
 	// Json Serialization
@@ -105,4 +107,21 @@ tasks.named("compileKotlin") {
 
 tasks.named("resolveMainClassName") {
 	dependsOn("instrumentKotlinModels")
+}
+
+kover {
+	reports {
+		verify {
+			rule {
+				minBound(100)
+			}
+		}
+
+		filters {
+			excludes {
+				classes("com.github.sanmoo.ddd.synchronizer.Application*", "com.github.sanmoo.ddd.synchronizer.legacy" +
+						".persistence.models.*")
+			}
+		}
+	}
 }

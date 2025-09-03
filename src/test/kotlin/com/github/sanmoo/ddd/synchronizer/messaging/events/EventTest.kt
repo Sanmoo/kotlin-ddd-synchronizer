@@ -1,7 +1,7 @@
 package com.github.sanmoo.ddd.synchronizer.messaging.events
 
 import com.github.sanmoo.ddd.synchronizer.messaging.Message
-import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
+import com.github.sanmoo.ddd.synchronizer.util.OBJECT_MAPPER
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -46,16 +46,26 @@ class EventTest {
     @ParameterizedTest
     @MethodSource("testData")
     fun testFrom(scenarioDescription: String, json: String) {
-        val message = Message.from(StandardObjectMapper.INSTANCE.readTree(json))
+        val message = Message.from(OBJECT_MAPPER.readTree(json))
         expectSelfie(message).toMatchDisk(scenarioDescription)
     }
 
     @Test
     fun testFromWhenEventTypeIsUnknown() {
         val exception = assertFailsWith<Exception> {
-            Message.from(StandardObjectMapper.INSTANCE.readTree(buildEventJson("unknown")))
+            Message.from(OBJECT_MAPPER.readTree(buildEventJson("unknown")))
         }
 
         assertEquals("Unknown event type: unknown", exception.message)
+    }
+
+    @Test
+    fun testFromWhenMessageTypeIsUnknown() {
+        val exception = assertFailsWith<Exception> {
+            Message.from(OBJECT_MAPPER.readTree("{\"type\": \"unknown\", \"id\": \"abc\", \"aggregateId\": \"123\", " +
+                    "\"createdAt\": \"2023-06-01T00:00:00.000Z\"}"))
+        }
+
+        assertEquals("Unknown message type: unknown", exception.message)
     }
 }

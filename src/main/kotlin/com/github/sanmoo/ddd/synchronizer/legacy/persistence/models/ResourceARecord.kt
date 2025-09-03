@@ -1,4 +1,4 @@
-package com.github.sanmoo.ddd.synchronizer.legacy.persistency.models
+package com.github.sanmoo.ddd.synchronizer.legacy.persistence.models
 
 import org.javalite.activejdbc.CompanionModel
 import org.javalite.activejdbc.Model

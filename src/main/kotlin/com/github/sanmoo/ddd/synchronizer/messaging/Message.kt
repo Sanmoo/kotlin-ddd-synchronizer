@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.Command
 import com.github.sanmoo.ddd.synchronizer.messaging.events.Event
-import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
+import com.github.sanmoo.ddd.synchronizer.util.OBJECT_MAPPER
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
@@ -46,8 +46,7 @@ abstract class Message(
     }
 
     open fun toObjectNode(): ObjectNode {
-        val mapper = StandardObjectMapper.INSTANCE
-        val result = mapper.createObjectNode()
+        val result = OBJECT_MAPPER.createObjectNode()
         result.put("id", id)
         result.put("aggregateId", aggregateId)
         result.put("createdAt", createdAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))

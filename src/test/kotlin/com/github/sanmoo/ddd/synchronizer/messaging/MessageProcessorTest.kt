@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.runTest
 import org.javalite.activejdbc.Base
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.jdbc.core.JdbcTemplate
@@ -145,5 +146,21 @@ class MessageProcessorTest {
 
         assertTrue(succeeded)
         expectSelfie(jdbcTemplate.queryForMap("SELECT * FROM resource_a").toString()).toMatchDisk()
+    }
+
+    @Test
+    fun testProcessResourceWhenTransactionIsAlreadyAttached() = runTest {
+        setupEmbeddedDatabase()
+        Base.attach(jdbcTemplate.dataSource?.connection)
+        val succeeded = sut.processMessage(setupCommandSQSMessage("create.resource.a.downstream"))
+        assertTrue(succeeded)
+    }
+
+    @Test
+    fun testProcessResourceWhenThereIsAnError() = runTest {
+        setupEmbeddedDatabase()
+        Base.attach(jdbcTemplate.dataSource?.connection)
+        jdbcTemplate.execute("drop table resource_a");
+        assertThrows<Exception> { sut.processMessage(setupCommandSQSMessage("create.resource.a.downstream")) }
     }
 }

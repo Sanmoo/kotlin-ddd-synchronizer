@@ -1,14 +1,10 @@
 package com.github.sanmoo.ddd.synchronizer.messaging
 
-import com.github.sanmoo.ddd.synchronizer.legacy.persistency.models.ResourceARecord
-import com.github.sanmoo.ddd.synchronizer.messaging.commands.CommandSQSDispatcher
-import com.github.sanmoo.ddd.synchronizer.messaging.commands.CreateResourceADownstream
-import com.github.sanmoo.ddd.synchronizer.messaging.commands.CreateResourceAUpstream
-import com.github.sanmoo.ddd.synchronizer.messaging.commands.UpdateResourceADownstream
-import com.github.sanmoo.ddd.synchronizer.messaging.commands.UpdateResourceAUpstream
+import com.github.sanmoo.ddd.synchronizer.legacy.persistence.models.ResourceARecord
+import com.github.sanmoo.ddd.synchronizer.messaging.commands.*
 import com.github.sanmoo.ddd.synchronizer.messaging.events.Event
 import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
-import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
+import com.github.sanmoo.ddd.synchronizer.util.OBJECT_MAPPER
 import org.javalite.activejdbc.Base
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
@@ -26,43 +22,36 @@ class MessageProcessor(
     private val logger = LoggerFactory.getLogger(MessageProcessor::class.java)
 
     suspend fun processMessage(sqsMessage: SqsMessage): Boolean {
-        try {
-            val content = sqsMessage.body()
-            val jsonNode = StandardObjectMapper.INSTANCE.readTree(content)
-            val message = Message.from(jsonNode)
+        val content = sqsMessage.body()
+        val jsonNode = OBJECT_MAPPER.readTree(content)
+        val message = Message.from(jsonNode)
 
-            if (message is Event) {
-                commandDispatcher.dispatch(message.toCommandList(clock, supplier))
+        if (message is Event) {
+            commandDispatcher.dispatch(message.toCommandList(clock, supplier))
+        } else {
+            if (message is CreateResourceAUpstream) {
+                logger.info("Create Resource A Upstream: Consuming... an API to create Resource A Upstream")
+                logger.info("Done")
+            } else if (message is UpdateResourceAUpstream) {
+                logger.info("Update Resource A Upstream: Consuming... an API to update Resource A Upstream")
+                logger.info("Done")
+            } else if (message is CreateResourceADownstream) {
+                processResource(message.resourceA, true)
+                logger.info("Created Resource A Downstream successfully")
             } else {
-                if (message is CreateResourceAUpstream) {
-                    logger.info("Create Resource A Upstream: Consuming... an API to create Resource A Upstream")
-                    logger.info("Done")
-                } else if (message is UpdateResourceAUpstream) {
-                    logger.info("Update Resource A Upstream: Consuming... an API to update Resource A Upstream")
-                    logger.info("Done")
-                } else if (message is CreateResourceADownstream) {
-                    processResource(message.resourceA, true)
-                    logger.info("Created Resource A Downstream successfully")
-                } else if (message is UpdateResourceADownstream) {
-                    processResource(message.resourceA, false)
-                    logger.info("Updated Resource A Downstream successfully")
-                }
+                processResource((message as UpdateResourceADownstream).resourceA, false)
+                logger.info("Updated Resource A Downstream successfully")
             }
-
-            logger.debug("Ended processing message id: ${message.id}")
-
-            return true
-        } catch (e: Exception) {
-            // Log the error and return false to keep the message in the queue
-            println("Error processing message: ${e.message}")
-            e.printStackTrace()
-            return false
         }
+
+        logger.debug("Ended processing message id: ${message.id}")
+
+        return true
     }
 
-    private fun processResource(resourceA: ResourceA, creation: Boolean): Unit {
+    private fun processResource(resourceA: ResourceA, creation: Boolean) {
         if (!Base.hasConnection()) {
-            Base.attach(jdbcTemplate.dataSource?.connection)
+            Base.attach(jdbcTemplate.dataSource!!.connection)
         }
         Base.openTransaction()
         try {

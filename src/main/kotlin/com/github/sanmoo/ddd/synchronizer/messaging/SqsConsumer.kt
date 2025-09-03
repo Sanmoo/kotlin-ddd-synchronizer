@@ -4,7 +4,9 @@ import com.github.sanmoo.ddd.synchronizer.config.SqsProperties
 import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
@@ -25,23 +27,21 @@ class SqsConsumer(
     private val messageProcessor: MessageProcessor,
     private val sqsProperties: SqsProperties,
     @Value("\${sqs.queue-url}")
-    private val queueUrl: String
-) : CoroutineScope {
+    private val queueUrl: String,
+    @Qualifier("queuePolling")
+    private val coroutineContext: CoroutineContext
+) {
     private val logger = LoggerFactory.getLogger(SqsConsumer::class.java)
     private val isRunning = AtomicBoolean(false)
-    private val job = SupervisorJob()
-    private val executor = Executors.newVirtualThreadPerTaskExecutor()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
-
+    private val supervisor = SupervisorJob()
     private val messageChannel = Channel<Message>(Channel.UNLIMITED)
+    private val coroutineScope = CoroutineScope(coroutineContext + supervisor)
 
     @EventListener(ApplicationReadyEvent::class)
     fun start() {
         if (isRunning.compareAndSet(false, true)) {
             logger.info("Starting SQS consumer")
-            launch {
+            coroutineScope.launch {
                 repeat(MAX_PARALLEL_MESSAGES) {
                     launchProcessor()
                 }
@@ -54,13 +54,15 @@ class SqsConsumer(
     fun stop() {
         if (isRunning.compareAndSet(true, false)) {
             logger.info("Stopping SQS consumer")
-            job.cancel()
-            executor.shutdown()
+            supervisor.cancel()
+            coroutineScope.cancel()
         }
     }
 
-    private fun CoroutineScope.launchProcessor() = launch {
-        for (message in messageChannel) {
+    private suspend fun launchProcessor() = coroutineScope.launch {
+        while (isRunning.get()) {
+            val message = messageChannel.receive()
+
             try {
                 val success = messageProcessor.processMessage(message)
                 if (success) {
@@ -82,9 +84,7 @@ class SqsConsumer(
                     .visibilityTimeout(10)
                     .build()
 
-                val response = withContext(Dispatchers.IO) {
-                    sqsClient.receiveMessage(receiveRequest).get()
-                }
+                val response = sqsClient.receiveMessage(receiveRequest).await()
 
                 response.messages().forEach { message ->
                     messageChannel.send(message)

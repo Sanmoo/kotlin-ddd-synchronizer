@@ -1,7 +1,7 @@
 package com.github.sanmoo.ddd.synchronizer.messaging.commands
 
 import com.github.sanmoo.ddd.synchronizer.messaging.Message
-import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
+import com.github.sanmoo.ddd.synchronizer.util.OBJECT_MAPPER
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
@@ -45,14 +45,14 @@ class CommandTest {
     @ParameterizedTest
     @MethodSource("testData")
     fun testFrom(scenarioDescription: String, json: String) {
-        val message = Message.from(StandardObjectMapper.INSTANCE.readTree(json))
+        val message = Message.from(OBJECT_MAPPER.readTree(json))
         expectSelfie(message).toMatchDisk(scenarioDescription)
     }
 
     @Test
     fun testFromWhenCommandTypeIsUnknown() {
         val exception = assertFailsWith<Exception> {
-            Message.from(StandardObjectMapper.INSTANCE.readTree(buildCommandJson("unknown")))
+            Message.from(OBJECT_MAPPER.readTree(buildCommandJson("unknown")))
         }
 
         assertEquals("Unknown command type: unknown", exception.message)

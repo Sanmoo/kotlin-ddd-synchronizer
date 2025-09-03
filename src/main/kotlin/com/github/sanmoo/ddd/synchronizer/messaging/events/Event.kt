@@ -1,14 +1,10 @@
 package com.github.sanmoo.ddd.synchronizer.messaging.events
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.sanmoo.ddd.synchronizer.messaging.Message
+import com.github.sanmoo.ddd.synchronizer.messaging.*
 import com.github.sanmoo.ddd.synchronizer.messaging.commands.Command
-import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_CREATED_DOWNSTREAM
-import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_CREATED_UPSTREAM
-import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_UPDATED_DOWNSTREAM
-import com.github.sanmoo.ddd.synchronizer.messaging.RESOURCE_A_UPDATED_UPSTREAM
 import com.github.sanmoo.ddd.synchronizer.messaging.resources.ResourceA
-import com.github.sanmoo.ddd.synchronizer.util.StandardObjectMapper
+import com.github.sanmoo.ddd.synchronizer.util.OBJECT_MAPPER
 import java.time.Clock
 import java.time.OffsetDateTime
 
@@ -32,7 +28,7 @@ abstract class Event(
                     createdAt = createdAt,
                     origination = origination,
                     id = id,
-                    resourceA = StandardObjectMapper.INSTANCE.convertValue(node.get("data"), ResourceA::class.java)
+                    resourceA = OBJECT_MAPPER.convertValue(node.get("data"), ResourceA::class.java)
                 )
 
                 RESOURCE_A_CREATED_DOWNSTREAM -> ResourceACreatedDownstream(
@@ -40,7 +36,7 @@ abstract class Event(
                     createdAt = createdAt,
                     origination = origination,
                     id = id,
-                    resourceA = StandardObjectMapper.INSTANCE.convertValue(node.get("data"), ResourceA::class.java)
+                    resourceA = OBJECT_MAPPER.convertValue(node.get("data"), ResourceA::class.java)
                 )
 
                 RESOURCE_A_UPDATED_DOWNSTREAM -> ResourceAUpdatedDownstream(
@@ -48,7 +44,7 @@ abstract class Event(
                     createdAt = createdAt,
                     origination = origination,
                     id = id,
-                    resourceA = StandardObjectMapper.INSTANCE.convertValue(node.get("data"), ResourceA::class.java)
+                    resourceA = OBJECT_MAPPER.convertValue(node.get("data"), ResourceA::class.java)
                 )
 
                 RESOURCE_A_UPDATED_UPSTREAM -> ResourceAUpdatedUpstream(
@@ -56,7 +52,7 @@ abstract class Event(
                     createdAt = createdAt,
                     origination = origination,
                     id = id,
-                    resourceA = StandardObjectMapper.INSTANCE.convertValue(node.get("data"), ResourceA::class.java)
+                    resourceA = OBJECT_MAPPER.convertValue(node.get("data"), ResourceA::class.java)
                 )
 
                 else -> throw Exception("Unknown event type: ${node.get("type").textValue()}")
